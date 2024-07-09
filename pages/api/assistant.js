@@ -24,7 +24,6 @@ db.once('open', () => {
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
 
-const getModels = async ()=> {
     // MongoDB Schema and Model
 const threadSchema = await new mongoose.Schema({
     userMessage: String,
@@ -34,9 +33,7 @@ const threadSchema = await new mongoose.Schema({
 
 // Specify the collection name explicitly
 const Thread = await mongoose.model('Thread', threadSchema);
-}
 
-getModels();
 
 let threads = {};  // In-memory store for threads
 
