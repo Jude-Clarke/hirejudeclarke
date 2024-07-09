@@ -1,9 +1,9 @@
 import OpenAI from "openai";
 import mongoose from "mongoose";
-// //Rate Limiter Imports
-// import { NextRequest } from "next/server";
-// import { Ratelimit } from "@upstash/ratelimit";
-// import { kv } from "@vercel/kv";
+//Rate Limiter Imports
+import { NextRequest } from "next/server";
+import { Ratelimit } from "@upstash/ratelimit";
+import { kv } from "@vercel/kv";
 
 require('dotenv').config();
 
@@ -27,15 +27,15 @@ db.once('open', () => {
 
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 
-// //Configure Rate Limiter
-// const ratelimit = new Ratelimit({
-//     redis: kv,
-//     limiter: Ratelimit.slidingWindow(2, "180s"),
-// })
+//Configure Rate Limiter
+const ratelimit = new Ratelimit({
+    redis: kv,
+    limiter: Ratelimit.slidingWindow(2, "180s"),
+})
 
-// export const config = {
-//     runtime: "edge",
-// }
+export const config = {
+    runtime: "edge",
+}
 
 
 
@@ -58,21 +58,21 @@ const handler = async (req, res) => {
     let { threadId } = req.body;
 
 
-    //  //ratelimiter code
-    //  const ip = req.ip ?? "127.0.0.1";
-    //  const { limit, reset, remaining } = await ratelimit.limit(ip);
+     //ratelimiter code
+     const ip = req.ip ?? "127.0.0.1";
+     const { limit, reset, remaining } = await ratelimit.limit(ip);
  
-    //  //If rate limit is reached, send an error code.
-    //  if(remaining === 0) {
-    //      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
-    //          status: 429,
-    //          headers: {
-    //              "X-RateLimit-Limit": limit.toString(),
-    //              "X-RateLimit-Remaining": remaining.toString(),
-    //              "X-RateLimit-Reset": reset.toString(),
-    //          },
-    //      })
-    //  } else {
+     //If rate limit is reached, send an error code.
+     if(remaining === 0) {
+         return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+             status: 429,
+             headers: {
+                 "X-RateLimit-Limit": limit.toString(),
+                 "X-RateLimit-Remaining": remaining.toString(),
+                 "X-RateLimit-Reset": reset.toString(),
+             },
+         })
+     } else {
          //If rate limit is not reached, call the api.
         try {
             console.log('Checking for existing thread with threadId:', threadId);
@@ -174,7 +174,7 @@ const handler = async (req, res) => {
             console.error('Error saving thread:', error);
             res.status(500).json({ error: 'Error saving thread' });
         }
-    //  }
+     }
 };
 
 export default handler;
