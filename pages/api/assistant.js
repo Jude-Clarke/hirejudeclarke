@@ -38,17 +38,19 @@ export const config = {
 }
 
 
-
-// MongoDB Schema and Model
-const threadSchema = new mongoose.Schema({
+const getModels = async ()=> {
+    // MongoDB Schema and Model
+const threadSchema = await new mongoose.Schema({
     userMessage: String,
     threadId: String,
     messages: [{ role: String, content: String }],
 });
 
 // Specify the collection name explicitly
-const Thread = mongoose.model('Thread', threadSchema);
+const Thread = await mongoose.model('Thread', threadSchema);
+}
 
+getModels();
 
 let threads = {};  // In-memory store for threads
 
